@@ -1,6 +1,6 @@
 const { model, Schema } = require("mongoose");
 
-const userSchmea = new userSchmea({
+const userSchmea = new Schema({
     username: String,
     password: String,
     email: String,
