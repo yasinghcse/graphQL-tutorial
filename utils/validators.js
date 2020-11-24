@@ -29,3 +29,24 @@ module.exports.validateRegisterUser = ( username, email, password, confirmPasswo
     };
 
 };
+
+module.exports.validateLogin = (username, password) => {
+    const errors= {};
+
+    //// username validations
+    if (username.trim() === "") {
+        errors.username= "Username cannot be empty";
+    }
+
+    // email validations
+    if (password.trim() === "") {
+        errors.password = "Password cannot be empty";
+    } 
+
+    return {
+        errors,
+        valid: Object.keys(errors).length < 1
+    };
+
+
+};

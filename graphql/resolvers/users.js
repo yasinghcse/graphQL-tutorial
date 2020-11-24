@@ -4,7 +4,7 @@ const { UserInputError } = require("apollo-server");
 
 const User = require("./../../models/User");
 const { SECRET } = require("./../../config");
-const { validateRegisterUser } = require("./../../utils/validators");
+const { validateRegisterUser, validateLogin } = require("./../../utils/validators");
 
 function _generateJWTToken(user) {
     return jwt.sign(
@@ -20,6 +20,46 @@ function _generateJWTToken(user) {
 
 module.exports = {
     Mutation: {
+
+        // Login user functionality
+        async login(_, { loginInput: {username, password}}) {
+
+            // Perform validations
+            const { errors, valid } = validateLogin(username, password);
+            if (!valid) {
+                throw new UserInputError("Invalid Inputs", { errors });
+            }
+
+            // find the user
+            // TODO: wrap inside try catch
+            const user = await User.findOne({ username });
+            if (!user) {
+                throw new UserInputError("Invalid Inputs", {
+                    errors: {
+                        username: "Username is not found"
+                }});
+            }
+
+            // compare the password
+            const match = await bcrypt.compare(password, user.password);
+            if (!match) {
+                throw new UserInputError("Invalid Credentials", {
+                   errors: {
+                       general: "Invalid credentials"
+                   } 
+                });
+            }
+
+            // generate and return token
+            const token = _generateJWTToken(user);
+            return {
+                ...user._doc,
+                id: user._id,
+                token
+            };
+        },
+
+        // Register User functionality
         async register(_, { registerInput: {username, email, password, confirmPassword }}) {
             
             // Perform validations
